@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -19,12 +21,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '=hs6$#5om031nujz4staql9mbuste=!dc^6)4opsjq!vvjxzj@'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Для production установите DJANGO_DEBUG=False.
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = ['*']
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ValueError("Для production задайте DJANGO_SECRET_KEY.")
+    SECRET_KEY = "local-development-only"
+
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+        "*" if DEBUG else "",
+    ).split(",")
 
 # Application definition
 
@@ -123,16 +134,18 @@ STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'backend.User'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_USE_TLS = True
-
-EMAIL_HOST = 'smtp.mail.ru'
-
-EMAIL_HOST_USER = 'netology.diplom@mail.ru'
-EMAIL_HOST_PASSWORD = 'CLdm7yW4U9nivz9mbexu'
-EMAIL_PORT = '465'
-EMAIL_USE_SSL = True
-SERVER_EMAIL = EMAIL_HOST_USER
+# Локально письма выводятся в консоль; SMTP настраивается через переменные окружения.
+EMAIL_BACKEND = os.getenv(
+    "DJANGO_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "noreply@example.com")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "false").lower() == "true"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "false").lower() == "true"
+SERVER_EMAIL = os.getenv("SERVER_EMAIL", EMAIL_HOST_USER)
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
