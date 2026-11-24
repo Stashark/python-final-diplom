@@ -270,6 +270,10 @@ class OrderItem(models.Model):
             models.UniqueConstraint(fields=['order_id', 'product_info'], name='unique_order_item'),
         ]
 
+    def __str__(self):
+        return f"{self.product_info} — {self.quantity} шт."
+    # Покажет название товара, магазин и количество
+
 
 class ConfirmEmailToken(models.Model):
     objects = models.manager.Manager()
