@@ -170,6 +170,9 @@ class ProductInfo(models.Model):
 
     def __str__(self):
         return f"{self.product.name} — {self.shop.name}"
+    # Показывает название товара и магазина
+
+
 
 class Parameter(models.Model):
     objects = models.manager.Manager()
@@ -200,6 +203,9 @@ class ProductParameter(models.Model):
             models.UniqueConstraint(fields=['product_info', 'parameter'], name='unique_product_parameter'),
         ]
 
+    def __str__(self):
+        return f"{self.parameter.name}: {self.value}"
+    # Запись показывает название характеристики и её значение
 
 class Contact(models.Model):
     objects = models.manager.Manager()
