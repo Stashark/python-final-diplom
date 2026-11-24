@@ -58,6 +58,8 @@ coverage.xml
 
 
 */migrations/*
+!*/migrations/*.py
+# Так Git сможет отслеживать Python-файлы миграций
 .log
 db.sqlite3
 
